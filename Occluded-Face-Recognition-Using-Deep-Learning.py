@@ -8,14 +8,11 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 
-# Ensure the dataset directories exist
 os.makedirs('C:\\Users\\Keerthan\\Desktop\\tempdataset\\train\\sam', exist_ok=True)
 os.makedirs('C:\\Users\\Keerthan\\Desktop\\tempdataset\\test\\sam', exist_ok=True)
 
-# Initialize face classifier
 face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# Function to extract face from an image
 def face_extractor(img):
     faces = face_classifier.detectMultiScale(img, 1.3, 5)
     if len(faces) == 0:
@@ -24,9 +21,8 @@ def face_extractor(img):
         cropped_face = img[y:y + h, x:x + w]
         return cropped_face
 
-# GUI Class
 class FaceApp:
-    def _init_(self, root):  # Corrected constructor name
+    def _init_(self, root):  
         self.root = root
         self.root.title("Face Detection and Recognition")
         self.root.geometry("800x600")
@@ -85,17 +81,16 @@ class FaceApp:
         self.model = tf.keras.Sequential([
             base_model,
             tf.keras.layers.GlobalAveragePooling2D(),
-            tf.keras.layers.Dense(1, activation='sigmoid')  # Use sigmoid for binary classification
+            tf.keras.layers.Dense(1, activation='sigmoid')
         ])
 
         self.model.compile(optimizer='adam',
-                           loss='binary_crossentropy',  # Use binary crossentropy for binary classification
+                           loss='binary_crossentropy',
                            metrics=['accuracy'])
 
         train_data_dir = 'C:\\Users\\Keerthan\\Desktop\\tempdataset\\train\\'
         validation_data_dir = 'C:\\Users\\Keerthan\\Desktop\\tempdataset\\test\\'
 
-        # Check directory contents
         print("Training directory:", train_data_dir)
         print("Validation directory:", validation_data_dir)
 
@@ -118,15 +113,14 @@ class FaceApp:
             train_data_dir,
             target_size=(img_rows, img_cols),
             batch_size=batch_size,
-            class_mode='binary')  # Use 'binary' for binary classification
+            class_mode='binary') 
 
         validation_generator = validation_datagen.flow_from_directory(
             validation_data_dir,
             target_size=(img_rows, img_cols),
             batch_size=batch_size,
-            class_mode='binary')  # Use 'binary' for binary classification
+            class_mode='binary')
 
-        # Check the number of samples
         print(f"Number of training samples: {train_generator.samples}")
         print(f"Number of validation samples: {validation_generator.samples}")
 
@@ -150,8 +144,7 @@ class FaceApp:
             image_name = file_names[random_file_index]
             return cv2.imread(os.path.join(file_path, image_name)), path_class
 
-        # Define the dictionary based on class indices
-        class_indices = {'sam': 0}  # Update based on actual classes
+        class_indices = {'sam': 0}
         monkey_breeds_dict = {v: k for k, v in class_indices.items()}
 
         for i in range(0, 10):
@@ -166,7 +159,7 @@ class FaceApp:
             res = np.argmax(self.model.predict(input_im, 1, verbose=0), axis=1)
             predicted_class = monkey_breeds_dict.get(res[0], "Unknown")
 
-            print(f"Predicted: {predicted_class}, Actual: {path_class}")  # Add this line for debugging
+            print(f"Predicted: {predicted_class}, Actual: {path_class}") 
 
             BLACK = [0, 0, 0]
             expanded_image = cv2.copyMakeBorder(input_original, 80, 0, 0, 100, cv2.BORDER_CONSTANT, value=BLACK)
@@ -176,7 +169,7 @@ class FaceApp:
 
         cv2.destroyAllWindows()
 
-if _name_ == "_main_":  # Fixed name check
+if _name_ == "_main_":
     root = tk.Tk()
     app = FaceApp(root)
     root.mainloop()
